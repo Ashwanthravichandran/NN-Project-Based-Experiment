@@ -1,4 +1,6 @@
-#Project Based Experiments
+# Project Based Experiments
+### Name : ASHWANTH R
+### REG NO : 212224040033
 ## Objective :
  Build a Multilayer Perceptron (MLP) to classify handwritten digits in python
 ## Steps to follow:
@@ -29,8 +31,112 @@ Visualize the training/validation loss and accuracy over epochs to understand th
 
 # Program:
 Insert your code here
+```python
+import numpy as np
+from sklearn.datasets import fetch_openml
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+import matplotlib.pyplot as plt
+import seaborn as sns
+mnist = fetch_openml('mnist_784', version=1, as_frame=False)
+X = mnist.data.astype(np.float32)
+y = mnist.target.astype(int)
+X = X / 255.0
+X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.4, random_state=42, stratify=y)
+X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42, stratify=y_temp)
+scaler = StandardScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_val_s   = scaler.transform(X_val)
+X_test_s  = scaler.transform(X_test)
+mlp = MLPClassifier(
+    hidden_layer_sizes=(256, 128),
+    activation='relu',
+    solver='adam',
+    alpha=1e-4,
+    batch_size=256,
+    learning_rate_init=1e-3,
+    max_iter=200,
+    early_stopping=True,
+    validation_fraction=0.1,
+    n_iter_no_change=15,
+    tol=1e-4,
+    verbose=True,
+    random_state=42
+)
+mlp.fit(X_train_s, y_train)
+y_val_pred = mlp.predict(X_val_s)
+y_test_pred = mlp.predict(X_test_s)
+print("Val accuracy:", accuracy_score(y_val, y_val_pred))
+print("Test accuracy:", accuracy_score(y_test, y_test_pred))
+print("\nClassification report (test):\n", classification_report(y_test, y_test_pred))
+cm = confusion_matrix(y_test, y_test_pred)
+plt.figure(figsize=(9,7))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+plt.title("Confusion Matrix (test)")
+plt.xlabel("Predicted")
+plt.ylabel("True")
+plt.show()
+plt.figure()
+plt.plot(mlp.loss_curve_)
+plt.title("Training Loss Curve")
+plt.xlabel("Iteration")
+plt.ylabel("Loss")
+plt.show()
 
+# ↓ separate statement here ↓
+mis_idx = np.where(y_test_pred != y_test)[0]
+print("Total misclassified (test):", len(mis_idx))
+n_show = min(12, len(mis_idx))
+plt.figure(figsize=(12, 6))
+for i, idx in enumerate(mis_idx[:n_show]):
+    ax = plt.subplot(3, 4, i+1)
+    ax.imshow(X_test[idx].reshape(28,28), cmap='gray')
+    ax.set_title(f"True: {y_test[idx]}, Pred: {y_test_pred[idx]}")
+    ax.axis('off')
+plt.tight_layout()
+plt.show()
+
+correct_idx = np.where(y_test_pred == y_test)[0]
+print("Total correctly classified:", len(correct_idx))
+
+n_show = min(12, len(correct_idx))
+plt.figure(figsize=(12, 6))
+
+for i, idx in enumerate(correct_idx[:n_show]):
+    ax = plt.subplot(3, 4, i+1)  # this adds an Axes to the figure
+    ax.imshow(X_test[idx].reshape(28, 28), cmap='gray')
+    ax.set_title(f"True & Pred: {y_test[idx]}")
+    ax.axis('off')
+
+plt.tight_layout()
+plt.show()
+
+```
 ## Output:
 Show your results here
+# Training:
 
+<img width="489" height="426" alt="image" src="https://github.com/user-attachments/assets/8edf68f7-7f5b-419b-8247-43886acbb08d" />
+
+# Accuracy:
+
+<img width="692" height="471" alt="image" src="https://github.com/user-attachments/assets/776cb965-453e-47ec-ad62-b9f6200bb039" />
+
+# Confusion Matrix:
+
+<img width="1045" height="793" alt="image" src="https://github.com/user-attachments/assets/c75024de-bd8e-4dfa-978b-74c67aee9846" />
+
+# Loss:
+
+<img width="864" height="561" alt="image" src="https://github.com/user-attachments/assets/a7e23b51-294b-4d15-9258-e5fce021513c" />
+
+# Classification:
+
+<img width="1261" height="730" alt="image" src="https://github.com/user-attachments/assets/7ded3ffd-6d06-4621-b0df-5201dab40c3b" />
+
+# Misclassification:
+
+<img width="1252" height="717" alt="image" src="https://github.com/user-attachments/assets/6bd7b5c1-9363-4fee-bf28-3f6553ca8c5a" />
 
